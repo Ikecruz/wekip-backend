@@ -1,8 +1,12 @@
 import App from "./app"
 import TestRoute from "./routes/test.route"
 
-const app = new App([
-    new TestRoute()
-])
+function bootstrap() {
+    const app = new App([
+        new TestRoute()
+    ])
+    
+    app.listen()
+}
 
-app.listen()
+bootstrap();
