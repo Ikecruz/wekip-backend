@@ -11,10 +11,12 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  username String @unique
-  password String
+  id             Int     @id @default(autoincrement())
+  email          String  @unique
+  username       String  @unique
+  email_verified Boolean @default(false)
+  password       String
+  push_token     String?
 
   receipts Receipt[]
 
@@ -65,4 +67,17 @@ model ShareCode {
   updated_at DateTime @updatedAt
 
   @@map("share_codes")
+}
+
+model OtpToken {
+  id         Int      @id @default(autoincrement())
+  key        String
+  is_used    Boolean  @default(false)
+  expires    DateTime
+  creator_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("otp_tokens")
 }
