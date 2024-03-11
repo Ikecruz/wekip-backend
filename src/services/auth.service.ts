@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import database from "../database";
-import { UserLoginDto, UserRegisterDto } from "../dtos/auth.dto";
+import { BusinessLoginDto, BusinessRegisterDto, UserLoginDto, UserRegisterDto, VerifyEmailDto } from "../dtos/auth.dto";
 import jwt from "jsonwebtoken"
 import { JWT_EXPIRES_IN, JWT_SECRET_KEY } from "../config";
 import bcrypt from "bcrypt";
@@ -8,17 +8,20 @@ import HttpException from "../utils/exception";
 import { StatusCodes } from "http-status-codes";
 import { MailService } from "./mail.service";
 import { TokenService } from "./token.service";
+import { MediaService } from "./media.service";
 
 export class AuthService {
 
     private ormService: PrismaClient;
     private mailService: MailService;
     private tokenService: TokenService;
+    private readonly mediaService: MediaService
 
     constructor () {
         this.ormService = database.getClient();
         this.mailService = new MailService();
         this.tokenService = new TokenService();
+        this.mediaService = new MediaService();
     }
 
     public async registerUser(dto: UserRegisterDto) {
@@ -69,7 +72,7 @@ export class AuthService {
             }
         })
 
-        await this.sendVerificationToken(email, true);
+        await this.sendVerificationToken(email, "user", true);
 
         return {message: "Signup successfully"}
 
@@ -101,7 +104,7 @@ export class AuthService {
         
         if (!userFromDb.email_verified) {
 
-            await this.sendVerificationToken(userFromDb.email)
+            await this.sendVerificationToken(userFromDb.email, "user")
 
             throw new HttpException(
                 StatusCodes.CONFLICT,
@@ -122,33 +125,142 @@ export class AuthService {
 
     }
 
-    public async sendVerificationToken (email: string, newUser: boolean = false) {
+    public async sendVerificationToken (email: string, role: "business" | "user", newUser: boolean = false) {
 
-        const user = await this.ormService.user.findFirst({
+        const entity = await this.ormService[role as string].findFirst({
             where: {email}
         })
 
-        if (!user) {
+        if (!entity) {
             throw new HttpException(
                 StatusCodes.NOT_FOUND,
                 "User not found"
             )
         }
 
-        const token = await this.tokenService.create(user.id);
+        const token = await this.tokenService.create(entity.id);
 
         await this.mailService.sendVerificationMail({
-            email: user.email,
+            email: entity.email,
             signup: newUser,
             token: token.key,
-            username: user.username
+            username: role === "user" ? entity.username : entity.name
         })
 
         return "Token sent";
 
     }
     
+    public async verifyEmail(dto: VerifyEmailDto) {
 
+        const token = await this.tokenService.validate(dto.token);
+
+        await this.ormService[dto.group as string].update({
+            where: {
+                id: token.creator_id
+            },
+            data: {
+                email_verified: true
+            }
+        })
+
+        return "Email Verified";
+
+    }
+
+    public async businessRegister(dto: BusinessRegisterDto, logo: Express.Multer.File) {
+        
+        const { email, name, password } = dto
+
+        const businessExists = await this.ormService.business.findFirst({
+            where: { email }
+        })
+
+        if (businessExists) {
+            throw new HttpException(
+                StatusCodes.BAD_REQUEST,
+                'Business already registered'
+            )
+        }
+
+        const nameTaken = await this.ormService.business.findFirst({
+            where: { name }
+        })
+
+        if (nameTaken) {
+            throw new HttpException(
+                StatusCodes.BAD_REQUEST,
+                'Business name already exists'
+            )
+        }
+
+        const alphanumericPattern = /^[a-z0-9]+$/
+        if(!alphanumericPattern.test(name)) {
+            throw new HttpException(
+                StatusCodes.BAD_REQUEST, 
+                'Business name must be alphanumeric'
+            )
+        }
+
+        const uploadedLogo = await this.mediaService.uploadImage(logo, 'images/business-logo');
+        const hashedPassword = await this.hashPassword(password);
+
+        await this.ormService.business.create({
+            data: {
+                email: email,
+                logo: uploadedLogo.url,
+                name: name,
+                password: hashedPassword,
+            }
+        })
+
+        return {message: "Signup successful"}
+    }
+
+    public async businessLogin (dto: BusinessLoginDto) {
+
+        const { email, password } = dto
+
+        const businessFromDb = await this.ormService.business.findFirst({
+            where: { email }
+        })
+
+        if (!businessFromDb) {
+            throw new HttpException(
+                StatusCodes.UNAUTHORIZED,
+                "Invalid Credentials"
+            )
+        }
+
+        const passwordsMatch = await this.passwordMatch(businessFromDb.password, password);
+
+        if (!passwordsMatch) {
+            throw new HttpException(
+                StatusCodes.UNAUTHORIZED,
+                "Invalid Credentials"
+            )
+        }
+        
+        if (!businessFromDb.email_verified) {
+
+            await this.sendVerificationToken(businessFromDb.email, "business")
+
+            throw new HttpException(
+                StatusCodes.CONFLICT,
+                "Email not verified"
+            )
+        }
+
+        const token = this.signJwt(businessFromDb.id)
+
+        const { created_at, updated_at, password: filteredPassword, ...business } = businessFromDb;
+
+        return {
+            business,
+            token
+        }
+
+    }
 
     public signJwt (id: number | object | Buffer) {
         return jwt.sign(

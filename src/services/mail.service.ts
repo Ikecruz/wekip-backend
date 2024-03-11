@@ -29,7 +29,7 @@ export class MailService {
         this.transport = createTransport({
             host: this.mailHost,
             port: this.mailPort,
-            secure: true,
+            secure: false,
             auth: {
                 user: this.mailUsername,
                 pass: this.mailPassword

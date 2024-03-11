@@ -1,13 +1,14 @@
 import cors from 'cors';
 import "express-async-errors"
 import express, { Application, Request } from "express";
-import { PORT } from './config';
+import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME, PORT } from './config';
 import { Route } from './interfaces/route.interface';
 import morganMiddleware from './middlewares/morgan.middleware';
 import { logger } from './utils/logger';
 import ErrorMiddleWare from './middlewares/error.middleware';
 import expressListRoutes from "express-list-routes"
 import database from './database';
+import { v2 as cloudinary } from "cloudinary";
 
 export default class App {
 
@@ -21,6 +22,7 @@ export default class App {
         this.database = database;
         this.initializeMiddlewares()
         this.initializeRoutes(routes)
+        this.initializeCloudinary()
         this.initializeErrorHandling()
         this.initializeDatabase()
         this.listRoutes()
@@ -41,7 +43,7 @@ export default class App {
 
     private initializeRoutes(routes: Route[]): void {
         routes.forEach(route => {
-            this.app.use("/api/v1", route.router)
+            this.app.use(`/api/v1${route.path ? '/'+route.path : ''}`, route.router)
         })
     } 
     
@@ -53,6 +55,16 @@ export default class App {
             logger.error(`🛢️ [Database]: Database connection failed`)
             console.log(error)
         }
+    }
+
+    private async initializeCloudinary() {
+        cloudinary.config({
+            cloud_name: CLOUDINARY_NAME,
+            api_key: CLOUDINARY_API_KEY,
+            api_secret: CLOUDINARY_API_SECRET
+        })
+
+        logger.info(`🖼️  [cloudinary]: Cloudinary configured`)
     }
 
     private initializeErrorHandling() {

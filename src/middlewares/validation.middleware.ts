@@ -2,6 +2,8 @@ import { plainToInstance } from "class-transformer";
 import { ValidationError, validate } from "class-validator";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { logger } from "../utils/logger";
+import HttpException from "../utils/exception";
+import { sanitize } from "class-sanitizer";
 
 interface Constraints { 
     [type: string]: string; 
@@ -43,7 +45,12 @@ export class DtoValidator {
             if (errors.length > 0) {
                 logger.error(errors)
                 const constraints = validator.getAllConstraints(errors);
-                
+                const errorStr = constraints.map((c) => Object.values(c)).flat().join(', ')
+                next(new HttpException(400, errorStr))
+            } else {
+                sanitize(dtoObject)
+                req[path] = dtoObject
+                next()
             }
         }
     }

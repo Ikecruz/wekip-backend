@@ -27,11 +27,12 @@ model User {
 }
 
 model Business {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  name     String @unique
-  logo     String
-  password String
+  id             Int     @id @default(autoincrement())
+  email          String  @unique
+  name           String  @unique
+  logo           String
+  password       String
+  email_verified Boolean @default(false)
 
   receipts_shared Receipt[]
 
