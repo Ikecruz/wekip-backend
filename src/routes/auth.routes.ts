@@ -2,9 +2,10 @@ import { Router } from "express";
 import { Route } from "../interfaces/route.interface";
 import { AuthController } from "../controllers/auth.controller";
 import { DtoValidator } from "../middlewares/validation.middleware";
-import { UserLoginDto, UserRegisterDto } from "../dtos/auth.dto";
+import { BusinessLoginDto, BusinessRegisterDto, UserLoginDto, UserRegisterDto, VerifyEmailDto } from "../dtos/auth.dto";
 
 export class AuthRoute implements Route {
+    
     public path: string;
     public router: Router;
     private readonly controller: AuthController;
@@ -28,6 +29,24 @@ export class AuthRoute implements Route {
             '/user/login',
             DtoValidator.validate(UserLoginDto, "body"),
             this.controller.loginUser
+        )
+
+        this.router.post(
+            '/business/register',
+            DtoValidator.validate(BusinessRegisterDto, "body"),
+            this.controller.registerBusiness
+        )
+
+        this.router.post(
+            '/business/login',
+            DtoValidator.validate(BusinessLoginDto, "body"),
+            this.controller.loginBusiness
+        )
+
+        this.router.post(
+            '/verify-email',
+            DtoValidator.validate(VerifyEmailDto, 'body'),
+            this.controller.verifyEmail
         )
 
     }
