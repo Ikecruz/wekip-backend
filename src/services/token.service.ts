@@ -74,7 +74,7 @@ export class TokenService {
 
     }
 
-    private generateToken(): Promise<string> {
+    public generateToken(): Promise<string> {
         return new Promise( async (resolve, reject) => {
             crypto.randomInt(100000, 999999, (err, n) => {
                 if (err) {
