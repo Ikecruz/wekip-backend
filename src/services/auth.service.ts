@@ -271,7 +271,7 @@ export class AuthService {
     }
 
     public verifyJwt (token: string) {
-        return jwt.verify(token, JWT_SECRET_KEY as string) as {id: string}
+        return jwt.verify(token, JWT_SECRET_KEY as string) as {id: number}
     }
 
     public async hashPassword (password: string) {

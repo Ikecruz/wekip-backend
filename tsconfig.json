@@ -12,7 +12,8 @@
     "noImplicitAny": false,
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "env.d.ts"
   ],
   "exclude": [
     "node_modules"
