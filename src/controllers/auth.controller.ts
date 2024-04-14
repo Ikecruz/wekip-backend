@@ -48,11 +48,6 @@ export class AuthController {
         response.status(StatusCodes.OK).send(res);
     }
 
-    public forgotPasswordVerifyToken = async (request: Request, response: Response, next: NextFunction) => {
-        const res = await this.authService.forgotPasswordVerifyToken(request.body.token);
-        response.status(StatusCodes.OK).send(res)
-    }
-
     public changePassword = async (request: Request, response: Response, next: NextFunction) => {
         const res = await this.authService.changePassword(request.body);
         response.status(StatusCodes.OK).send(res)

@@ -56,12 +56,6 @@ export class AuthRoute implements Route {
         )
 
         this.router.post(
-            '/forgot-password/verify',
-            DtoValidator.validate(VerifyEmailDto, "body"),
-            this.controller.forgotPasswordVerifyToken
-        )
-
-        this.router.post(
             `/change-password`,
             DtoValidator.validate(ChangePasswordDto, "body"),
             this.controller.changePassword

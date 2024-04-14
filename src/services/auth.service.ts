@@ -289,18 +289,6 @@ export class AuthService {
 
     }
 
-    public async forgotPasswordVerifyToken(token: string) {
-
-        const tokenValid = await this.tokenService.validate(token);
-
-        const newToken = await this.tokenService.create(tokenValid.creator_id);
-
-        return {
-            token: newToken.key
-        }
-
-    }
-
     public async changePassword(dto: ChangePasswordDto) {
 
         const token = await this.tokenService.validate(dto.token);
