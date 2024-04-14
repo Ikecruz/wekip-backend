@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import database from "../database";
-import { BusinessLoginDto, BusinessRegisterDto, UserLoginDto, UserRegisterDto, VerifyEmailDto } from "../dtos/auth.dto";
+import { BusinessLoginDto, BusinessRegisterDto, ChangePasswordDto, UserLoginDto, UserRegisterDto, VerifyEmailDto } from "../dtos/auth.dto";
 import jwt from "jsonwebtoken"
 import { JWT_EXPIRES_IN, JWT_SECRET_KEY } from "../config";
 import bcrypt from "bcrypt";
@@ -259,6 +259,64 @@ export class AuthService {
             business,
             token
         }
+
+    }
+
+    public async forgotPassword(email: string) {
+
+        const user = await this.ormService.user.findFirst({
+            where: {
+                email
+            }
+        })
+
+        if (!user) {
+            throw new HttpException(
+                StatusCodes.NOT_FOUND,
+                "User not found"
+            )
+        }
+
+        const token = await this.tokenService.create(user.id);
+
+        await this.mailService.sendPasswordResetMail({
+            token: token.key,
+            email: user.email,
+            username: user.username
+        })
+
+        return `Email sent to ${email}`
+
+    }
+
+    public async forgotPasswordVerifyToken(token: string) {
+
+        const tokenValid = await this.tokenService.validate(token);
+
+        const newToken = await this.tokenService.create(tokenValid.creator_id);
+
+        return {
+            token: newToken.key
+        }
+
+    }
+
+    public async changePassword(dto: ChangePasswordDto) {
+
+        const token = await this.tokenService.validate(dto.token);
+
+        const hashedPassword = await this.hashPassword(dto.password);   
+
+        await this.ormService.user.update({
+            where: {
+                id: token.creator_id,
+            },
+            data: {
+                password: hashedPassword
+            }
+        })
+
+        return "Password changed";
 
     }
 

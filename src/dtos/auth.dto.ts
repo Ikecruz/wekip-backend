@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, Length, MinLength } from "class-validator";
 
 export class UserRegisterDto {
 
@@ -68,5 +68,27 @@ export class BusinessLoginDto {
     @IsString()
     @IsNotEmpty()
     password: string;
+
+}
+
+export class ChangePasswordDto {
+
+    @IsString()
+    @IsNotEmpty()
+    @Length(6)
+    token: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(8)
+    password: string;
+
+}
+
+export class EmailDto {
+
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
 
 }

@@ -9,6 +9,12 @@ interface VerificationMail {
     username: string
 }
 
+interface PasswordResetMail {
+    email: string;
+    token: string;
+    username: string;
+}
+
 export class MailService {
 
     private transport: Transporter;
@@ -51,6 +57,26 @@ export class MailService {
             html: `
                 <strong>Hello ${username}</strong>
                 <p>Here's your one time pin <strong>${token}</strong> </p> 
+            `
+        }
+
+        return await this.transport.sendMail(mailOptions);
+
+    }
+
+    public async sendPasswordResetMail({
+        token,
+        email,
+        username
+    }: PasswordResetMail) {
+
+        const mailOptions: Options = {
+            from: `"Wekip" ${this.mailUsername}`,
+            to: email,
+            subject: "Password Reset",
+            html: `
+                <strong>Hello ${username}</strong>
+                <p>Reset password with token <strong>${token}</strong> </p> 
             `
         }
 

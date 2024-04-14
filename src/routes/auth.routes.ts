@@ -2,7 +2,7 @@ import { Router } from "express";
 import { Route } from "../interfaces/route.interface";
 import { AuthController } from "../controllers/auth.controller";
 import { DtoValidator } from "../middlewares/validation.middleware";
-import { BusinessLoginDto, BusinessRegisterDto, UserLoginDto, UserRegisterDto, VerifyEmailDto } from "../dtos/auth.dto";
+import { BusinessLoginDto, BusinessRegisterDto, ChangePasswordDto, EmailDto, UserLoginDto, UserRegisterDto, VerifyEmailDto } from "../dtos/auth.dto";
 
 export class AuthRoute implements Route {
     
@@ -47,6 +47,24 @@ export class AuthRoute implements Route {
             '/verify-email',
             DtoValidator.validate(VerifyEmailDto, 'body'),
             this.controller.verifyEmail
+        )
+
+        this.router.post(
+            `/forgot-password`,
+            DtoValidator.validate(EmailDto, "body"),
+            this.controller.forgotPassword
+        )
+
+        this.router.post(
+            '/forgot-password/verify',
+            DtoValidator.validate(VerifyEmailDto, "body"),
+            this.controller.forgotPasswordVerifyToken
+        )
+
+        this.router.post(
+            `/change-password`,
+            DtoValidator.validate(ChangePasswordDto, "body"),
+            this.controller.changePassword
         )
 
     }
