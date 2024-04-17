@@ -12,6 +12,7 @@ export class UserRoute implements Route {
         this.path = "user";
         this.router = Router();
         this.controller = new UserController();
+        this.initializeRoutes()
     }
 
     public initializeRoutes() {

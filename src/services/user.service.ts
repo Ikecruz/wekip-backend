@@ -12,6 +12,7 @@ export class UserService {
 
     constructor() {
         this.ormService = database.getClient();
+        this.tokenService = new TokenService();
     }
 
     public async createShareCode(user_id: number) {

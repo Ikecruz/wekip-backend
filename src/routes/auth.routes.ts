@@ -3,6 +3,7 @@ import { Route } from "../interfaces/route.interface";
 import { AuthController } from "../controllers/auth.controller";
 import { DtoValidator } from "../middlewares/validation.middleware";
 import { BusinessLoginDto, BusinessRegisterDto, ChangePasswordDto, EmailDto, UserLoginDto, UserRegisterDto, VerifyEmailDto } from "../dtos/auth.dto";
+import multer from "../utils/multer";
 
 export class AuthRoute implements Route {
     
@@ -33,6 +34,7 @@ export class AuthRoute implements Route {
 
         this.router.post(
             '/business/register',
+            multer.single('logo'),
             DtoValidator.validate(BusinessRegisterDto, "body"),
             this.controller.registerBusiness
         )

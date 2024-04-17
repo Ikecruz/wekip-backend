@@ -23,14 +23,8 @@ export class AuthController {
     }
 
     public registerBusiness = async (request: Request, response: Response, next: NextFunction) => {
-        try {
-            const res = await this.authService.businessRegister(request.body, request.file as Express.Multer.File);
-            response.status(StatusCodes.OK).send(res)
-        } catch (error) {
-            next(error)
-        } finally {
-            fs.unlink(path.resolve(request?.file?.path as string), () => { })
-        }
+        const res = await this.authService.businessRegister(request.body, request.file as Express.Multer.File);
+        response.status(StatusCodes.OK).send(res)
     }
 
     public loginBusiness = async (request: Request, response: Response, next: NextFunction) => {

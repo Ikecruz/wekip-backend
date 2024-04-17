@@ -54,7 +54,7 @@ export class AuthService {
             )
         }
 
-        const alphanumericPattern = /^[a-z0-9]+$/
+        const alphanumericPattern = /^[a-zA-Z0-9]+$/
         if(!alphanumericPattern.test(username)) {
             throw new HttpException(
                 StatusCodes.BAD_REQUEST, 
@@ -194,7 +194,7 @@ export class AuthService {
             )
         }
 
-        const alphanumericPattern = /^[a-z0-9]+$/
+        const alphanumericPattern = /^[a-zA-Z0-9]+$/
         if(!alphanumericPattern.test(name)) {
             throw new HttpException(
                 StatusCodes.BAD_REQUEST, 
