@@ -19,8 +19,14 @@ export class ReceiptController {
         response.status(StatusCodes.CREATED).send(res)
     }
 
-    public test = async (request: Request, response: Response, next: NextFunction) => {
+    public get = async (request: Request, response: Response, next: NextFunction) => {
+        const res = await this.service.get(request.user?.id as number, request.body)
+        response.status(StatusCodes.OK).send(res);
+    }
 
+    public stats = async (request: Request, response: Response, next: NextFunction) => {
+        const res = await this.service.stats();
+        response.status(StatusCodes.OK).send(res);
     }
 
 }

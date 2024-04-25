@@ -9,6 +9,10 @@ export class UserService {
 
     private readonly ormService: PrismaClient;
     private readonly tokenService: TokenService;
+    public excludedFields = [
+        "password",
+        "email_verified"
+    ]
 
     constructor() {
         this.ormService = database.getClient();
@@ -78,6 +82,12 @@ export class UserService {
 
         return foundCode
 
+    }
+
+    public exclude(obj: any, keys: string[]) {
+        return Object.fromEntries(
+          Object.entries(obj).filter(([key]) => !keys.includes(key))
+        )
     }
 
 }

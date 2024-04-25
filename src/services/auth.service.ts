@@ -9,19 +9,22 @@ import { StatusCodes } from "http-status-codes";
 import { MailService } from "./mail.service";
 import { TokenService } from "./token.service";
 import { MediaService } from "./media.service";
+import NotificationService from "./notification.service";
 
 export class AuthService {
 
     private ormService: PrismaClient;
     private mailService: MailService;
     private tokenService: TokenService;
-    private readonly mediaService: MediaService
+    private readonly mediaService: MediaService;
+    private readonly notificationService: NotificationService;
 
     constructor () {
         this.ormService = database.getClient();
         this.mailService = new MailService();
         this.tokenService = new TokenService();
         this.mediaService = new MediaService();
+        this.notificationService = new NotificationService()
     }
 
     public async registerUser(dto: UserRegisterDto) {
@@ -112,7 +115,23 @@ export class AuthService {
             )
         }
 
-        // TODO: validate and update push token
+        if (dto.push_token && !this.notificationService.checkPushToken(dto.push_token)) {
+            throw new HttpException(
+                StatusCodes.BAD_REQUEST,
+                'Invalid Push Token'
+            )
+        }
+
+        if(dto.push_token) {
+            await this.ormService.user.update({
+                where: {
+                    id: userFromDb.id
+                },
+                data: {
+                    push_token: dto.push_token,
+                }
+            })
+        }
 
         const token = this.signJwt(userFromDb.id)
 

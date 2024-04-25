@@ -4,7 +4,8 @@ import { ReceiptController } from "../controllers/receipt.controller";
 import { BusinessGuard } from "../guards/business.guard";
 import multer from "../utils/multer";
 import { DtoValidator } from "../middlewares/validation.middleware";
-import { CreateReceiptDto } from "../dtos/receipt.dto";
+import { CreateReceiptDto, GetReceiptDto } from "../dtos/receipt.dto";
+import { UserGuard } from "../guards/user.guard";
 
 export class ReceiptRoute implements Route {
 
@@ -27,6 +28,19 @@ export class ReceiptRoute implements Route {
             multer.single('receipt'),
             DtoValidator.validate(CreateReceiptDto, "body"),
             this.controller.create
+        )
+
+        this.router.get(
+            "",
+            UserGuard.jwtValid,
+            DtoValidator.validate(GetReceiptDto, "body"),
+            this.controller.get
+        )
+
+        this.router.get(
+            "/stats",
+            UserGuard.jwtValid,
+            this.controller.stats
         )
 
     }
