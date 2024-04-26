@@ -54,6 +54,18 @@ export class AuthRoute implements Route {
         )
 
         this.router.post(
+            '/user/otp',
+            DtoValidator.validate(EmailDto, "body"),
+            this.controller.sendVerificationToken("user")
+        )
+
+        this.router.post(
+            '/business/otp',
+            DtoValidator.validate(EmailDto, "body"),
+            this.controller.sendVerificationToken("business")
+        )
+
+        this.router.post(
             '/verify-email',
             DtoValidator.validate(VerifyEmailDto, 'body'),
             this.controller.verifyEmail

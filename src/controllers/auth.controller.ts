@@ -32,6 +32,12 @@ export class AuthController {
         response.status(StatusCodes.OK).send(res)
     }
 
+    public sendVerificationToken = (role: "business" | "user") =>
+        async (request: Request, response: Response, next: NextFunction) => {
+            const res = await this.authService.sendVerificationToken(request.body.email, role);
+            response.status(StatusCodes.OK).send(res)
+        }
+
     public verifyEmail = async (request: Request, response: Response, next: NextFunction) => {
         const res = await this.authService.verifyEmail(request.body);
         response.status(StatusCodes.OK).send(res)
