@@ -33,7 +33,7 @@ export class ReceiptRoute implements Route {
         this.router.get(
             "",
             UserGuard.jwtValid,
-            DtoValidator.validate(GetReceiptDto, "body"),
+            DtoValidator.validate(GetReceiptDto, "query"),
             this.controller.get
         )
 
