@@ -65,7 +65,7 @@ export class ReceiptService {
         const groupArrays = Object.keys(groups).map((date) => {
             return {
                 date,
-                transactions: groups[date]
+                receipts: groups[date]
             }
         })
         return groupArrays
